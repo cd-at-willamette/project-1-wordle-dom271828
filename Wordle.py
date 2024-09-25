@@ -1,8 +1,8 @@
 ########################################
-# Name:
+# Name: Dominic Canale
 # Collaborators (if any):
 # GenAI Transcript (if any):
-# Estimated time spent (hr):
+# Estimated time spent (hr): 1 (Milestone 0)
 # Description of any added extensions:
 ########################################
 
@@ -16,8 +16,14 @@ def wordle():
     def enter_action():
         # What should happen when RETURN/ENTER is pressed.
         gw.show_message("You need to implement this method")
+        word_to_row("hello", 0)
 
-
+    def word_to_row(word:str, row:int):
+        col = 0
+        for index in range(0, len(word)):
+            gw.set_square_letter(row, col, word[index])
+            col += 1
+    
     gw = WordleGWindow()
     gw.add_enter_listener(enter_action)
 
