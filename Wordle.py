@@ -2,7 +2,8 @@
 # Name: Dominic Canale
 # Collaborators (if any):
 # GenAI Transcript (if any):
-# Estimated time spent (hr): 1 (Milestone 0), 1 (Milestone 1), 3 (Milestone 2), 0.5 (Milestone 3),
+# Estimated time spent (hr): 1 (Milestone 0), 1 (Milestone 1), 3 (Milestone 2), 30m (Milestone 3),
+# 2 (Milestone 4), 10m (Milestone 5)
 # Description of any added extensions:
 ########################################
 
@@ -11,12 +12,17 @@ from english import * # ENGLISH_WORDS, is_english_word
 import random
 
 def wordle():
+    debug = True 
+
+    secretword = ""
+    while len(secretword) != 5:
+        debug and print("selected word", secretword, "is incompatible")
+        secretword = random.choice(ENGLISH_WORDS)
+    debug and print("the secret word is:", secretword)
+    
     # The main function to play the Wordle game.
     debug = True
     def enter_action():
-        if gw.get_current_row() == 0:
-            secretword = produceword(ENGLISH_WORDS)
-            # debug and word_to_row(secretword, gw.get_current_row())
         # What should happen when RETURN/ENTER is pressed.
         # gw.show_message("You need to implement this method")
         currentword = str.lower(word_from_row(gw.get_current_row()))
@@ -25,34 +31,60 @@ def wordle():
             debug and print('starting process')
             nusecret = ""
             unmatched = currentword
-            for i in range(0, N_COLS):
-                debug and print("checking if", currentword[i], "=", secretword[i])
-                if currentword[i] == secretword[i]:
-                    debug and print('this letter is correct')
+            if currentword == secretword:
+                for i in range(0, N_COLS):
                     gw.set_square_color(gw.get_current_row(), i, CORRECT_COLOR)
-                    nusecret += '_'
-                    unmatched = unmatched[:i] + '*' + unmatched[i+1:]
-                    debug and print('New secret var is', nusecret, 'and new guess var is', unmatched)
-                else:
-                    debug and print('the current letter', currentword[i], 'is NOT correct')
-                    nusecret += secretword[i]
-            debug and print('New guess var is', unmatched, 'and new secret var is', nusecret)
-            for i in range(0, N_COLS):
-                if gw.get_square_color(gw.get_current_row(), i) != CORRECT_COLOR:
-                    debug and print('checking if', unmatched[i], 'within', nusecret)
-                    if unmatched[i] in nusecret:
-                        debug and print('yes!')
-                        gw.set_square_color(gw.get_current_row(), i, PRESENT_COLOR)
-                        debug and print("removing letter", unmatched[i], "from", nusecret)
-                        nusecret = censor_letter(unmatched[i], nusecret)
+                    gw.set_key_color(currentword[i], CORRECT_COLOR)
+                N_ROWS = gw.get_current_row()
+                if N_ROWS == 0:
+                    gw.show_message("Cheater") # Haha
+                if N_ROWS == 1:
+                    gw.show_message("Magnificent")
+                if N_ROWS == 2:
+                    gw.show_message("Impressive")
+                if N_ROWS == 3:
+                    gw.show_message("Splendid")
+                if N_ROWS == 4:
+                    gw.show_message("Great")  
+                if N_ROWS == 5:
+                    gw.show_message("Phew")
+                return 0
+            else:
+                for i in range(0, N_COLS):
+                    debug and print("checking if", currentword[i], "=", secretword[i])
+                    if currentword[i] == secretword[i]:
+                        debug and print('this letter is correct')
+                        gw.set_square_color(gw.get_current_row(), i, CORRECT_COLOR)
+                        gw.set_key_color(currentword[i], CORRECT_COLOR)
+                        nusecret += '_'
                         unmatched = unmatched[:i] + '*' + unmatched[i+1:]
                         debug and print('New secret var is', nusecret, 'and new guess var is', unmatched)
                     else:
-                        debug and print('no')
-                        gw.set_square_color(gw.get_current_row(), i, MISSING_COLOR)
-                        debug and print('Secret var is', nusecret, 'and guess var is', unmatched)
-            gw.set_current_row(gw.get_current_row() + 1)
-
+                        debug and print('the current letter', currentword[i], 'is NOT correct')
+                        nusecret += secretword[i]
+                debug and print('New guess var is', unmatched, 'and new secret var is', nusecret)
+                for i in range(0, N_COLS):
+                    if gw.get_square_color(gw.get_current_row(), i) != CORRECT_COLOR:
+                        debug and print('checking if', unmatched[i], 'within', nusecret)
+                        if unmatched[i] in nusecret:
+                            debug and print('yes!')
+                            gw.set_square_color(gw.get_current_row(), i, PRESENT_COLOR)
+                            if gw.get_key_color(unmatched[i]) != CORRECT_COLOR:
+                                gw.set_key_color(unmatched[i], PRESENT_COLOR)
+                            debug and print("removing letter", unmatched[i], "from", nusecret)
+                            nusecret = censor_letter(unmatched[i], nusecret)
+                            unmatched = unmatched[:i] + '*' + unmatched[i+1:]
+                            debug and print('New secret var is', nusecret, 'and new guess var is', unmatched)
+                        else:
+                            debug and print('no')
+                            gw.set_square_color(gw.get_current_row(), i, MISSING_COLOR)
+                            if gw.get_key_color(unmatched[i]) == UNKNOWN_COLOR:
+                                gw.set_key_color(unmatched[i], MISSING_COLOR)
+                            debug and print('Secret var is', nusecret, 'and guess var is', unmatched)
+                if gw.get_current_row() == N_COLS:
+                    gw.show_message("The word was")
+                    gw.show_message(secretword)
+                gw.set_current_row(gw.get_current_row() + 1)
 
     def censor_letter(letter:str, word:str) -> str:
         for index in range(len(word)):
@@ -69,14 +101,13 @@ def wordle():
             gw.show_message('not in word list')
             return False
 
-    def produceword(collection:list) -> str:
-        word = random.choice(collection)
+    def produceword() -> str:
+        word = random.choice(ENGLISH_WORDS)
         while len(word) != 5:
             debug and print("selected word", word, "is incompatible")
-            word = random.choice(collection)
+            word = random.choice(ENGLISH_WORDS)
         debug and print("the secret word is:", word)
         return str.lower(word)
-
 
     def word_to_row(word:str, row:int):
         col = 0
@@ -91,12 +122,9 @@ def wordle():
             word += str(gw.get_square_letter(row, col))
             col += 1
         return word
-
+    
     gw = WordleGWindow()
     gw.add_enter_listener(enter_action)
-
-
-
 
 # Startup boilerplate
 if __name__ == "__main__":
